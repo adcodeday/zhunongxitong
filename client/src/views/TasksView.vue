@@ -2,7 +2,7 @@
   <div class="tasks-manage">
     <div class="header">
       <h2>任务管理</h2>
-      <el-button type="primary" @click="showAddDialog = true">新增任务</el-button>
+      <el-button v-if="isAdmin" type="primary" @click="showAddDialog = true">新增任务</el-button>
     </div>
     <div class="table-center">
       <el-table
@@ -23,16 +23,35 @@
           </template>
         </el-table-column>
         <el-table-column prop="任务报酬" label="任务报酬" width="180"/>
-        <el-table-column prop="已报名人数" label="需要人数" width="90"/>
+        <el-table-column prop="已报名人数" label="已报名人数" width="100"/>
         <el-table-column prop="任务详情" label="任务详情" width="180"/>
         <el-table-column label="操作" width="180">
           <template #default="{ row, $index }">
-            <el-button size="small" @click="onEdit(row, $index)">编辑</el-button>
-            <el-button size="small" type="danger" @click="onDelete(row, $index)">删除</el-button>
+            <!-- 管理员：编辑 + 删除 -->
+            <template v-if="isAdmin">
+              <el-button size="small" @click="onEdit(row, $index)">编辑</el-button>
+              <el-button size="small" type="danger" @click="onDelete(row, $index)">删除</el-button>
+            </template>
+            <!-- 客户：只有进行中的任务才显示按钮 -->
+            <template v-if="isClient && row['任务状态'] === 3">
+              <el-button
+                v-if="!acceptedIds.has(row.id)"
+                size="small"
+                type="success"
+                @click="onAccept(row)"
+              >接取任务</el-button>
+              <el-button
+                v-else
+                size="small"
+                type="warning"
+                @click="onCancel(row)"
+              >取消接取</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
     </div>
+
     <!-- 新增任务弹窗 -->
     <el-dialog v-model="showAddDialog" title="新增任务" width="500px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="90px">
@@ -82,6 +101,7 @@
         <el-button type="primary" @click="addTask">确定</el-button>
       </template>
     </el-dialog>
+
     <!-- 编辑任务弹窗 -->
     <el-dialog v-model="showEditDialog" title="编辑任务" width="500px">
       <el-form :model="form" :rules="rules" ref="formEditRef" label-width="90px">
@@ -140,6 +160,12 @@ import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const apiUrl = import.meta.env.VITE_API_URL
+
+// 获取当前用户权限
+const user = JSON.parse(localStorage.getItem('user') || '{}')
+const isAdmin = user.authority === 0
+const isClient = user.authority === 2
+
 const tasks = ref([])
 const loading = ref(false)
 const showAddDialog = ref(false)
@@ -164,6 +190,9 @@ const statusMap = {
   3: '进行中',
   4: '已结束'
 }
+
+// 已接取的任务 id 集合
+const acceptedIds = ref(new Set())
 
 // 校验规则
 const rules = {
@@ -248,7 +277,6 @@ const onDelete = (row, index) => {
     type: 'warning'
   }).then(async () => {
     try {
-      // 假设有 id 字段，实际情况请根据你的主键调整
       const id = row.id
       await axios.delete(`${apiUrl}/tables/tasks/${id}`)
       ElMessage.success('删除成功')
@@ -256,6 +284,32 @@ const onDelete = (row, index) => {
     } catch (e) {
       ElMessage.error('删除失败')
     }
+  })
+}
+
+// 接取任务
+const onAccept = (row) => {
+  ElMessageBox.confirm(`确定要接取任务「${row['任务名称']}」吗？`, '提示', {
+    type: 'info',
+    confirmButtonText: '确定接取',
+    cancelButtonText: '取消'
+  }).then(() => {
+    acceptedIds.value = new Set([...acceptedIds.value, row.id])
+    ElMessage.success('接取成功！')
+  })
+}
+
+// 取消接取
+const onCancel = (row) => {
+  ElMessageBox.confirm(`确定要取消接取任务「${row['任务名称']}」吗？`, '提示', {
+    type: 'warning',
+    confirmButtonText: '确定取消',
+    cancelButtonText: '返回'
+  }).then(() => {
+    const newSet = new Set(acceptedIds.value)
+    newSet.delete(row.id)
+    acceptedIds.value = newSet
+    ElMessage.success('已取消接取')
   })
 }
 

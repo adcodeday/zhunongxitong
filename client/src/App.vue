@@ -1,7 +1,7 @@
 <template>
   <div class="farm-assistant">
     <header>
-      <h1 class="logo">助农管理系统</h1>
+      <h1 class="logo">智慧助农电商平台</h1>
       <button v-if="isMobile" class="menu-toggle" @click="toggleMenu">
         <span></span>
         <span></span>
@@ -9,10 +9,10 @@
       </button>
       <nav :class="{ 'mobile-menu': isMobile, open: menuOpen }">
         <RouterLink v-if="user" to="/" @click="menuOpen = false">首页</RouterLink>
-        <RouterLink v-if="user && user.authority == 0" to="/products">农产品管理</RouterLink>
+        <RouterLink v-if="user && user.authority == 0" to="/products" @click="menuOpen = false">农产品管理</RouterLink>
         <RouterLink v-if="user && user.authority == 0" to="/farmers" @click="menuOpen = false">农户管理</RouterLink>
         <RouterLink v-if="user && (user.authority == 0 || user.authority == 1)" to="/tasks" @click="menuOpen = false">任务管理</RouterLink>
-        <RouterLink v-if="user && user.authority >= 0 && user.authority <= 2" to="/orders" @click="menuOpen = false">订单管理</RouterLink>
+        <RouterLink v-if="user" to="/orders" @click="menuOpen = false">订单管理</RouterLink>
         <RouterLink v-if="user" to="/statistics" @click="menuOpen = false">数据统计</RouterLink>
         <RouterLink v-if="user" to="/news" @click="menuOpen = false">问题咨询</RouterLink>
         <RouterLink v-if="user" to="/personal" @click="menuOpen = false">个人中心</RouterLink>
@@ -20,17 +20,12 @@
       </nav>
     </header>
 
-    <main>
+    <main :class="{ 'main-home': isHome }">
       <RouterView />
     </main>
-    
+
     <!-- 退出登录确认弹窗 -->
-    <el-dialog
-      v-model="logoutDialogVisible"
-      title="确认退出"
-      width="30%"
-      center
-    >
+    <el-dialog v-model="logoutDialogVisible" title="确认退出" width="30%" center>
       <span>确定要退出登录吗？</span>
       <template #footer>
         <span class="dialog-footer">
@@ -43,30 +38,30 @@
 </template>
 
 <script setup>
-import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const isMobile = ref(false)
 const menuOpen = ref(false)
 const user = ref(null)
 const router = useRouter()
+const route = useRoute()
 const logoutDialogVisible = ref(false)
+
+// 判断是否是首页，首页不加 padding
+const isHome = computed(() => route.path === '/')
 
 const checkScreenSize = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-// 显示退出登录确认弹窗
 const showLogoutConfirm = (event) => {
   event.preventDefault()
   logoutDialogVisible.value = true
-  if (isMobile.value) {
-    menuOpen.value = false
-  }
+  if (isMobile.value) menuOpen.value = false
 }
 
-// 确认退出登录
 const confirmLogout = () => {
   logout()
   logoutDialogVisible.value = false
@@ -79,24 +74,20 @@ const logout = () => {
   router.push('/login')
 }
 
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value
+}
+
 onMounted(() => {
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
-  
-  // 从本地存储获取用户信息
   const userStr = localStorage.getItem('user')
-  if (userStr) {
-    user.value = JSON.parse(userStr)
-  }
+  if (userStr) user.value = JSON.parse(userStr)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkScreenSize)
 })
-
-const toggleMenu = () => {
-  menuOpen.value = !menuOpen.value
-}
 </script>
 
 <style scoped lang="scss">
@@ -114,30 +105,33 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 5%;
+  padding: 0 5%;
+  height: 60px;
   background-color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   z-index: 1000;
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #42b983;
   margin-right: 30px;
+  white-space: nowrap;
 }
 
 nav a {
-  margin-left: 20px;
-  color: #333;
+  margin-left: 4px;
+  color: #555;
   text-decoration: none;
-  transition: all 0.3s ease;
-  padding: 8px 12px;
-  border-radius: 4px;
+  transition: all 0.2s ease;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 nav a:hover {
-  background-color: #f0f0f0;
+  background-color: #f0faf5;
   color: #42b983;
 }
 
@@ -147,14 +141,28 @@ nav a.router-link-exact-active {
   background-color: rgba(66, 185, 131, 0.1);
 }
 
-/* 移动端样式 */
+/* 首页：不加 padding，内容铺满 */
+main {
+  margin-top: 60px;
+  padding: 24px 5%;
+  min-height: calc(100vh - 60px);
+  background: #f3f6f3;
+}
+
+main.main-home {
+  padding: 0;
+  margin-top: 60px;
+  background: transparent;
+}
+
+/* 移动端 */
 .menu-toggle {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: 10px;
-  
+
   span {
     display: block;
     width: 25px;
@@ -172,7 +180,7 @@ nav a.router-link-exact-active {
   left: 0;
   right: 0;
   background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 100;
   flex-direction: column;
   padding: 10px 0;
@@ -186,63 +194,35 @@ nav a.router-link-exact-active {
   margin: 0;
   padding: 12px 20px;
   border-bottom: 1px solid #eee;
+  border-radius: 0;
 }
 
 @media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  nav:not(.mobile-menu) {
-    display: none;
-  }
+  .menu-toggle { display: block; }
+  nav:not(.mobile-menu) { display: none; }
+  main { margin-top: 60px; padding: 16px; }
+  main.main-home { padding: 0; }
 }
 
 @media (min-width: 769px) {
-  .mobile-menu {
-    display: none !important;
-  }
+  .mobile-menu { display: none !important; }
 }
 
-main {
-  margin-top: 80px; /* 为固定导航栏留出空间 */
-  padding: 20px 5%;
-}
-
-@media (max-width: 768px) {
-  header {
-    padding: 10px 20px;
-  }
-
-  .logo {
-    font-size: 1.2rem;
-  }
-
-  main {
-    margin-top: 60px;
-  }
-}
-
-/* 退出登录链接样式 */
+/* 退出登录 */
 .logout-link {
-  
   color: #f56c6c !important;
   text-decoration: none;
-  transition: all 0.3s ease;
-  background-color: white !important;
-  border-radius: 4px;
+  transition: all 0.2s ease;
+  background-color: transparent !important;
+  border-radius: 6px;
   font-weight: 500;
 
-  
   &:hover {
-    background-color: rgba(245, 108, 108, 0.1);
+    background-color: rgba(245, 108, 108, 0.1) !important;
     color: #f56c6c !important;
   }
-  
-
 }
 
-/* 移动端退出登录样式 */
 .mobile-menu .logout-link {
   margin: 0;
   padding: 12px 20px;
@@ -250,7 +230,7 @@ main {
   border-radius: 0;
 }
 
-/* 弹窗样式 */
+/* 弹窗 */
 .dialog-footer {
   display: flex;
   justify-content: center;

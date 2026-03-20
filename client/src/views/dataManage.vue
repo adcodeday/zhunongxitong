@@ -1,1165 +1,641 @@
 <template>
-    <div class="data-manage-container">
-      <div class="dashboard-header">
-        <h1>农产品数据分析平台</h1>
-        <div class="time-selector">
-          <el-radio-group v-model="timeRange" size="small">
-            <el-radio-button label="week">本周</el-radio-button>
-            <el-radio-button label="month">本月</el-radio-button>
-            <el-radio-button label="year">全年</el-radio-button>
-          </el-radio-group>
+  <div class="dashboard">
+    <!-- 顶部标题区 -->
+    <div class="dash-header">
+      <div class="header-left">
+        <div class="header-badge">数据总览</div>
+        <h1 class="header-title">智慧助农电商平台</h1>
+        <p class="header-sub">2025 年度运营数据统计</p>
+      </div>
+      <div class="header-right">
+        <div class="live-dot"></div>
+        <span class="live-text">实时更新</span>
+        <span class="update-time">最后更新：2025-07-18 14:30</span>
+      </div>
+    </div>
+
+    <!-- 核心指标卡片 -->
+    <div class="kpi-row">
+      <div class="kpi-card kpi-1">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">年度总收入</div>
+          <div class="kpi-value">¥<span class="kpi-num">284.7</span><span class="kpi-unit">万</span></div>
+          <div class="kpi-trend up">▲ 18.3% 同比增长</div>
+        </div>
+        <svg class="kpi-spark" viewBox="0 0 80 32"><polyline points="0,28 10,22 20,25 30,14 40,18 50,8 60,12 70,4 80,6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="kpi-card kpi-2">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-body">
+          <div class="kpi-label">累计订单数</div>
+          <div class="kpi-value"><span class="kpi-num">12,856</span><span class="kpi-unit">单</span></div>
+          <div class="kpi-trend up">▲ 24.1% 同比增长</div>
+        </div>
+        <svg class="kpi-spark" viewBox="0 0 80 32"><polyline points="0,26 10,20 20,22 30,12 40,16 50,6 60,10 70,2 80,4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="kpi-card kpi-3">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-body">
+          <div class="kpi-label">注册用户数</div>
+          <div class="kpi-value"><span class="kpi-num">3,420</span><span class="kpi-unit">人</span></div>
+          <div class="kpi-trend up">▲ 32.7% 同比增长</div>
+        </div>
+        <svg class="kpi-spark" viewBox="0 0 80 32"><polyline points="0,30 10,26 20,28 30,18 40,20 50,10 60,14 70,6 80,8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="kpi-card kpi-4">
+        <div class="kpi-icon">🌾</div>
+        <div class="kpi-body">
+          <div class="kpi-label">在售农产品</div>
+          <div class="kpi-value"><span class="kpi-num">286</span><span class="kpi-unit">种</span></div>
+          <div class="kpi-trend up">▲ 15.2% 同比增长</div>
+        </div>
+        <svg class="kpi-spark" viewBox="0 0 80 32"><polyline points="0,24 10,20 20,22 30,14 40,16 50,8 60,10 70,4 80,6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="kpi-card kpi-5">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">任务完成率</div>
+          <div class="kpi-value"><span class="kpi-num">89.4</span><span class="kpi-unit">%</span></div>
+          <div class="kpi-trend down">▼ 2.1% 较上月</div>
+        </div>
+        <svg class="kpi-spark" viewBox="0 0 80 32"><polyline points="0,10 10,14 20,12 30,18 40,16 50,20 60,18 70,22 80,24" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+    </div>
+
+    <!-- 中间区：月度趋势 + 分类占比 -->
+    <div class="mid-row">
+      <!-- 月度销售趋势 -->
+      <div class="chart-card chart-wide">
+        <div class="card-header">
+          <span class="card-title">月度销售趋势</span>
+          <div class="legend-row">
+            <span class="legend-item"><em class="dot dot-green"></em>销售额(万元)</span>
+            <span class="legend-item"><em class="dot dot-orange"></em>订单量</span>
+          </div>
+        </div>
+        <div class="bar-chart-wrap">
+          <div class="y-axis">
+            <span>60</span><span>45</span><span>30</span><span>15</span><span>0</span>
+          </div>
+          <div class="bars-area">
+            <div class="bar-group" v-for="(item, i) in monthData" :key="i">
+              <div class="bar-pair">
+                <div class="bar bar-green" :style="{ height: (item.sales / 60 * 140) + 'px' }" :title="'销售额：¥' + item.sales + '万'">
+                  <span class="bar-tip">{{ item.sales }}</span>
+                </div>
+                <div class="bar bar-orange" :style="{ height: (item.orders / 1400 * 140) + 'px' }" :title="'订单量：' + item.orders">
+                  <span class="bar-tip">{{ item.orders }}</span>
+                </div>
+              </div>
+              <span class="bar-label">{{ item.month }}</span>
+            </div>
+            <!-- 网格线 -->
+            <div class="grid-lines">
+              <div class="grid-line" v-for="n in 4" :key="n"></div>
+            </div>
+          </div>
         </div>
       </div>
-  
-      <el-row :gutter="20" class="dashboard-row">
-        <el-col :xs="24" :sm="12" :md="6" v-for="(card, index) in dataCards" :key="index">
-          <div class="data-card" :class="card.type">
-            <div class="card-icon">
-              <el-icon>
-                <component :is="card.icon"></component>
-              </el-icon>
-            </div>
-            <div class="card-content">
-              <div class="card-title">{{ card.title }}</div>
-              <div class="card-value">{{ card.value }}</div>
-              <div class="card-change" :class="card.trend">
-                <el-icon>
-                  <component :is="card.trend === 'up' ? 'ArrowUp' : 'ArrowDown'"></component>
-                </el-icon>
-                {{ card.change }}% 较上期
-              </div>
-            </div>
+
+      <!-- 品类占比 -->
+      <div class="chart-card chart-narrow">
+        <div class="card-header">
+          <span class="card-title">品类销售占比</span>
+        </div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#f0f4f0" stroke-width="28"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#42b983" stroke-width="28"
+              stroke-dasharray="131.9 307.9" stroke-dashoffset="0" class="donut-seg"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#73d9a8" stroke-width="28"
+              stroke-dasharray="86.7 353.1" stroke-dashoffset="-131.9" class="donut-seg"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#f5a623" stroke-width="28"
+              stroke-dasharray="61.5 378.3" stroke-dashoffset="-218.6" class="donut-seg"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#e85d5d" stroke-width="28"
+              stroke-dasharray="43.9 396.0" stroke-dashoffset="-280.1" class="donut-seg"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#6c9eff" stroke-width="28"
+              stroke-dasharray="15.7 424.1" stroke-dashoffset="-324.0" class="donut-seg"/>
+            <text x="100" y="95" text-anchor="middle" class="donut-center-val">43%</text>
+            <text x="100" y="115" text-anchor="middle" class="donut-center-label">蔬菜水果</text>
+          </svg>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item" v-for="cat in categories" :key="cat.name">
+            <span class="dl-dot" :style="{ background: cat.color }"></span>
+            <span class="dl-name">{{ cat.name }}</span>
+            <span class="dl-pct">{{ cat.pct }}%</span>
           </div>
-        </el-col>
-      </el-row>
-  
-      <el-row :gutter="20" class="dashboard-row">
-        <el-col :xs="24" :md="16">
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3>农产品销售趋势</h3>
-              <div class="chart-controls">
-                <el-select v-model="selectedProduct" placeholder="选择产品" size="small" style="width: 120px; margin-right: 10px;">
-                  <el-option v-for="item in productOptions" :key="item.value" :label="item.label" :value="item.value">
-                  </el-option>
-                </el-select>
-                <el-radio-group v-model="salesChartType" size="small">
-                  <el-radio-button label="bar">柱状图</el-radio-button>
-                  <el-radio-button label="line">折线图</el-radio-button>
-                  <el-radio-button label="mixed">混合图</el-radio-button>
-                </el-radio-group>
-              </div>
-            </div>
-            <div ref="salesTrendChart" class="chart"></div>
-          </div>
-        </el-col>
-        <el-col :xs="24" :md="8">
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3>产品类别分布</h3>
-              <el-radio-group v-model="pieChartType" size="small">
-                <el-radio-button label="pie">饼图</el-radio-button>
-                <el-radio-button label="ring">环形图</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div ref="categoryPieChart" class="chart"></div>
-          </div>
-        </el-col>
-      </el-row>
-  
-      <el-row :gutter="20" class="dashboard-row">
-        <el-col :xs="24" :md="12">
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3>各地区销售情况</h3>
-              <el-radio-group v-model="regionChartType" size="small">
-                <el-radio-button label="bar">柱状图</el-radio-button>
-                <el-radio-button label="pie">饼图</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div ref="regionBarChart" class="chart"></div>
-          </div>
-        </el-col>
-        <el-col :xs="24" :md="12">
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3>农产品价格波动</h3>
-              <el-radio-group v-model="priceChartType" size="small">
-                <el-radio-button label="line">折线图</el-radio-button>
-                <el-radio-button label="bar">柱状图</el-radio-button>
-                <el-radio-button label="area">面积图</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div ref="priceFluctuationChart" class="chart"></div>
-          </div>
-        </el-col>
-      </el-row>
-  
-      <el-row :gutter="20" class="dashboard-row">
-        <el-col :span="24">
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3>热门农产品排行</h3>
-              <el-radio-group v-model="rankingChartType" size="small">
-                <el-radio-button label="horizontal">横向柱状图</el-radio-button>
-                <el-radio-button label="vertical">纵向柱状图</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div ref="rankingChart" class="chart"></div>
-          </div>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { onMounted, ref, watch, onBeforeUnmount } from 'vue';
-  import * as echarts from 'echarts';
-  import { 
-    Money, ShoppingCart, Apple, User, 
-    ArrowUp, ArrowDown 
-  } from '@element-plus/icons-vue';
-import console from 'node:console';
 
-  // 响应式数据
-  const timeRange = ref('month');
-  const selectedProduct = ref('apple');
-  const priceChartType = ref('line');
-  const salesChartType = ref('mixed');
-  const pieChartType = ref('ring');
-  const regionChartType = ref('bar');
-  const rankingChartType = ref('horizontal');
-  
-  // 图表实例引用
-  const salesTrendChart = ref(null);
-  const categoryPieChart = ref(null);
-  const regionBarChart = ref(null);
-  const priceFluctuationChart = ref(null);
-  const rankingChart = ref(null);
-  
-  // 图表实例对象
-  let salesTrendChartInstance = null;
-  let categoryPieChartInstance = null;
-  let regionBarChartInstance = null;
-  let priceFluctuationChartInstance = null;
-  let rankingChartInstance = null;
-  
-  // 数据卡片
-  const dataCards = ref([
-    {
-      title: '总销售额',
-      value: '¥ 2,456,789',
-      change: '12.5',
-      trend: 'up',
-      type: 'sales',
-      icon: 'Money'
-    },
-    {
-      title: '订单总量',
-      value: '8,546',
-      change: '8.2',
-      trend: 'up',
-      type: 'orders',
-      icon: 'ShoppingCart'
-    },
-    {
-      title: '农产品种类',
-      value: '124',
-      change: '3.1',
-      trend: 'up',
-      type: 'products',
-      icon: 'Apple'
-    },
-    {
-      title: '合作农户',
-      value: '1,893',
-      change: '1.2',
-      trend: 'down',
-      type: 'farmers',
-      icon: 'User'
-    }
-  ]);
-  
-  // 产品选项
-  const productOptions = ref([
-    { value: 'apple', label: '苹果' },
-    { value: 'orange', label: '橙子' },
-    { value: 'banana', label: '香蕉' },
-    { value: 'grape', label: '葡萄' },
-    { value: 'watermelon', label: '西瓜' },
-    { value: 'strawberry', label: '草莓' },
-    { value: 'kiwi', label: '猕猴桃' }
-  ]);
-  
-  // 销售趋势图表数据
-  const getSalesTrendData = () => {
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-    
-    // 根据选择的产品返回不同的数据
-    const productData = {
-      apple: [150, 230, 224, 218, 135, 147, 260, 265, 290, 310, 350, 380],
-      orange: [120, 200, 190, 170, 160, 120, 130, 140, 200, 230, 240, 250],
-      banana: [90, 110, 130, 150, 160, 180, 190, 200, 210, 220, 230, 240],
-      grape: [50, 60, 70, 90, 120, 160, 180, 190, 200, 210, 220, 230],
-      watermelon: [30, 40, 50, 60, 120, 150, 180, 210, 170, 130, 90, 60],
-      strawberry: [80, 120, 160, 200, 180, 150, 100, 80, 70, 90, 110, 130],
-      kiwi: [60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170]
-    };
-  
-    // 同比增长数据
-    const growthData = {
-      apple: [10, 15, 12, 8, -5, 3, 18, 2, 9, 7, 13, 8],
-      orange: [8, 12, -5, -10, -6, -25, 8, 7, 43, 15, 4, 4],
-      banana: [5, 22, 18, 15, 7, 12, 5, 5, 5, 5, 5, 4],
-      grape: [12, 20, 17, 29, 33, 33, 12, 5, 5, 5, 5, 5],
-      watermelon: [20, 33, 25, 20, 100, 25, 20, 17, -19, -24, -31, -33],
-      strawberry: [15, 50, 33, 25, -10, -17, -33, -20, -12, 29, 22, 18],
-      kiwi: [10, 17, 14, 12, 11, 10, 9, 8, 7, 7, 7, 6]
-    };
-  
-    return {
-      xAxis: months,
-      data: productData[selectedProduct.value] || productData.apple,
-      growth: growthData[selectedProduct.value] || growthData.apple
-    };
-  };
-  
-  // 产品类别分布数据
-  const getCategoryData = () => {
-    return [
-      { value: 35, name: '水果类' },
-      { value: 20, name: '蔬菜类' },
-      { value: 15, name: '谷物类' },
-      { value: 10, name: '坚果类' },
-      { value: 8, name: '食用菌类' },
-      { value: 7, name: '药材类' },
-      { value: 5, name: '其他' }
-    ];
-  };
-  
-  // 地区销售数据
-  const getRegionData = () => {
-    return [
-      { name: '华东地区', value: 4200 },
-      { name: '华南地区', value: 3500 },
-      { name: '华北地区', value: 2800 },
-      { name: '华中地区', value: 2500 },
-      { name: '西南地区', value: 1800 },
-      { name: '西北地区', value: 1200 },
-      { name: '东北地区', value: 1500 }
-    ];
-  };
-  
-  // 价格波动数据
-  const getPriceFluctuationData = () => {
-    return {
-      xAxis: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      series: [
-        {
-          name: '苹果',
-          data: [5.2, 5.5, 5.8, 6.0, 5.9, 5.8, 6.2, 6.5, 6.3, 6.1, 5.9, 6.0]
-        },
-        {
-          name: '橙子',
-          data: [4.5, 4.8, 5.0, 5.2, 5.3, 5.5, 5.6, 5.4, 5.2, 5.0, 4.8, 4.6]
-        },
-        {
-          name: '香蕉',
-          data: [3.8, 4.0, 4.2, 4.3, 4.5, 4.6, 4.5, 4.3, 4.2, 4.0, 3.9, 3.8]
-        },
-        {
-          name: '葡萄',
-          data: [8.5, 8.8, 9.0, 9.2, 9.0, 8.8, 8.5, 8.2, 8.0, 8.3, 8.5, 8.7]
-        },
-        {
-          name: '西瓜',
-          data: [2.0, 2.2, 2.5, 2.8, 3.0, 2.8, 2.5, 2.3, 2.0, 1.8, 1.9, 2.0]
-        }
-      ]
-    };
-  };
-  
-  // 热门农产品排行数据
-  const getRankingData = () => {
-    return {
-      products: ['苹果', '橙子', '香蕉', '葡萄', '西瓜', '草莓', '猕猴桃', '柚子', '梨', '桃'],
-      sales: [320, 302, 290, 274, 250, 236, 220, 200, 180, 160],
-      profits: [120, 102, 90, 80, 70, 60, 50, 40, 30, 20],
-      growth: [12.5, 10.2, 8.7, 15.3, 5.6, 20.1, 7.8, 4.5, 3.2, 6.7]
-    };
-  };
-  
-  // 初始化销售趋势图表
-  const initSalesTrendChart = () => {
-    if (!salesTrendChart.value) return;
-    salesTrendChartInstance = echarts.init(salesTrendChart.value);
-    updateSalesTrendChart();
-  };
-  
-  // 更新销售趋势图表
-  const updateSalesTrendChart = () => {
-    if (!salesTrendChartInstance) return;
-    const { xAxis, data, growth } = getSalesTrendData();
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      legend: {
-        data: ['销售量', '同比增长'],
-        textStyle: {
-          color: '#666'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: xAxis,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666'
-        }
-      },
-      yAxis: [
-        {
-          type: 'value',
-          name: '销售量 (吨)',
-          nameTextStyle: {
-            color: '#666'
-          },
-          axisLine: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#eee'
-            }
-          }
-        },
-        {
-          type: 'value',
-          name: '同比增长 (%)',
-          nameTextStyle: {
-            color: '#666'
-          },
-          axisLine: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666',
-            formatter: '{value}%'
-          },
-          splitLine: {
-            show: false
-          }
-        }
-      ],
-      series: getSalesTrendSeries(data, growth)
-    };
-    salesTrendChartInstance.setOption(option);
-  };
-  
-  // 根据图表类型获取销售趋势系列
-  const getSalesTrendSeries = (data, growth) => {
-    const series = [];
-    if (salesChartType.value === 'bar' || salesChartType.value === 'mixed') {
-      series.push({
-        name: '销售量',
-        type: 'bar',
-        data: data,
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#83bff6' },
-            { offset: 0.5, color: '#188df0' },
-            { offset: 1, color: '#188df0' }
-          ])
-        },
-        emphasis: {
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: '#2378f7' },
-              { offset: 0.7, color: '#2378f7' },
-              { offset: 1, color: '#83bff6' }
-            ])
-          }
-        }
-      });
-    }
-    
-    if (salesChartType.value === 'line' || salesChartType.value === 'mixed') {
-      series.push({
-        name: '销售量',
-        type: 'line',
-        smooth: true,
-        showSymbol: false,
-        data: data,
-        lineStyle: {
-          width: 3,
-          color: salesChartType.value === 'line' ? '#5470c6' : '#FF8C00'
-        },
-        itemStyle: {
-          color: salesChartType.value === 'line' ? '#5470c6' : '#FF8C00'
-        }
-      });
-    }
-    
-    series.push({
-      name: '同比增长',
-      type: 'line',
-      yAxisIndex: 1,
-      smooth: true,
-      showSymbol: true,
-      symbolSize: 6,
-      data: growth,
-      lineStyle: {
-        width: 2,
-        color: '#91cc75'
-      },
-      itemStyle: {
-        color: '#91cc75'
-      }
-    });
-    
-    return series;
-  };
-  
-  // 初始化产品类别分布图表
-  const initCategoryPieChart = () => {
-    if (!categoryPieChart.value) return;
-    
-    categoryPieChartInstance = echarts.init(categoryPieChart.value);
-    
-    updateCategoryPieChart();
-  };
-  
-  // 更新产品类别分布图表
-  const updateCategoryPieChart = () => {
-    if (!categoryPieChartInstance) return;
-    
-    const data = getCategoryData();
-    
-    const option = {
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b}: {c} ({d}%)'
-      },
-      legend: {
-        orient: 'vertical',
-        right: 10,
-        top: 'center',
-        data: data.map(item => item.name),
-        textStyle: {
-          color: '#666'
-        }
-      },
-      series: [
-        {
-          name: '产品类别',
-          type: 'pie',
-          radius: pieChartType.value === 'ring' ? ['50%', '70%'] : '70%',
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderRadius: 10,
-            borderColor: '#fff',
-            borderWidth: 2
-          },
-          label: {
-            show: pieChartType.value !== 'ring',
-            position: 'outside',
-            formatter: '{b}: {d}%'
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold'
-            }
-          },
-          labelLine: {
-            show: pieChartType.value !== 'ring'
-          },
-          data: data
-        }
-      ],
-      color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452']
-    };
-    
-    categoryPieChartInstance.setOption(option);
-  };
-  
-  // 初始化地区销售图表
-  const initRegionBarChart = () => {
-    if (!regionBarChart.value) return;
-    
-    regionBarChartInstance = echarts.init(regionBarChart.value);
-    
-    updateRegionBarChart();
-  };
-  
-  // 更新地区销售图表
-  const updateRegionBarChart = () => {
-    if (!regionBarChartInstance) return;
-    
-    const data = getRegionData();
-    
-    if (regionChartType.value === 'bar') {
-      const option = {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#999'
-            }
-          },
-          axisLabel: {
-            color: '#666'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#eee'
-            }
-          }
-        },
-        yAxis: {
-          type: 'category',
-          data: data.map(item => item.name),
-          axisLine: {
-            lineStyle: {
-              color: '#999'
-            }
-          },
-          axisLabel: {
-            color: '#666'
-          }
-        },
-        series: [
-          {
-            name: '销售额',
-            type: 'bar',
-            data: data.map(item => item.value),
-            itemStyle: {
-              color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
-                { offset: 0, color: '#83bff6' },
-                { offset: 0.5, color: '#188df0' },
-                { offset: 1, color: '#188df0' }
-              ])
-            },
-            label: {
-              show: true,
-              position: 'right',
-              formatter: '{c} 万元'
-            }
-          }
-        ]
-      };
-      
-      regionBarChartInstance.setOption(option);
-    } else {
-      const option = {
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          orient: 'vertical',
-          right: 10,
-          top: 'center',
-          data: data.map(item => item.name),
-          textStyle: {
-            color: '#666'
-          }
-        },
-        series: [
-          {
-            name: '地区销售',
-            type: 'pie',
-            radius: '70%',
-            center: ['40%', '50%'],
-            data: data,
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            },
-            label: {
-              formatter: '{b}: {c} 万元 ({d}%)'
-            }
-          }
-        ],
-        color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452']
-      };
-      
-      regionBarChartInstance.setOption(option);
-    }
-  };
-  
-  // 初始化价格波动图表
-  const initPriceFluctuationChart = () => {
-    if (!priceFluctuationChart.value) return;
-    
-    priceFluctuationChartInstance = echarts.init(priceFluctuationChart.value);
-    
-    updatePriceFluctuationChart();
-  };
-  
-  // 更新价格波动图表
-  const updatePriceFluctuationChart = () => {
-    if (!priceFluctuationChartInstance) return;
-    
-    const { xAxis, series } = getPriceFluctuationData();
-    
-    const option = {
-      tooltip: {
-        trigger: 'axis'
-      },
-      legend: {
-        data: series.map(item => item.name),
-        textStyle: {
-          color: '#666'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: priceChartType.value === 'bar',
-        data: xAxis,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666'
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: '价格 (元/kg)',
-        nameTextStyle: {
-          color: '#666'
-        },
-        axisLine: {
-          show: false
-        },
-        axisLabel: {
-          color: '#666'
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#eee'
-          }
-        }
-      },
-      series: series.map(item => ({
-        name: item.name,
-        type: priceChartType.value === 'area' ? 'line' : priceChartType.value,
-        data: item.data,
-        smooth: true,
-        areaStyle: priceChartType.value === 'area' ? {
-          opacity: 0.3
-        } : undefined
-      }))
-    };
-    
-    priceFluctuationChartInstance.setOption(option);
-  };
-  
-  // 初始化热门农产品排行图表
-  const initRankingChart = () => {
-    if (!rankingChart.value) return;
-    
-    rankingChartInstance = echarts.init(rankingChart.value);
-    
-    updateRankingChart();
-  };
-  
-  // 更新热门农产品排行图表
-  const updateRankingChart = () => {
-    if (!rankingChartInstance) return;
-    
-    const { products, sales, profits, growth } = getRankingData();
-    
-    if (rankingChartType.value === 'horizontal') {
-      const option = {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        legend: {
-          data: ['销售量', '利润', '增长率'],
-          textStyle: {
-            color: '#666'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#999'
-            }
-          },
-          axisLabel: {
-            color: '#666'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#eee'
-            }
-          }
-        },
-        yAxis: {
-          type: 'category',
-          data: products,
-          axisLine: {
-            lineStyle: {
-              color: '#999'
-            }
-          },
-          axisLabel: {
-            color: '#666'
-          }
-        },
-        series: [
-          {
-            name: '销售量',
-            type: 'bar',
-            data: sales,
-            itemStyle: {
-              color: '#5470c6'
-            }
-          },
-          {
-            name: '利润',
-            type: 'bar',
-            data: profits,
-            itemStyle: {
-              color: '#91cc75'
-            }
-          },
-          {
-            name: '增长率',
-            type: 'line',
-            yAxisIndex: 0,
-            data: growth.map((value, index) => ({
-              value: value,
-              yAxis: index,
-              xAxis: Math.max(sales[index], profits[index]) + 20
-            })),
-            symbolSize: 8,
-            itemStyle: {
-              color: '#fac858'
-            },
-            label: {
-              show: true,
-              position: 'right',
-              formatter: '{c}%'
-            }
-          }
-        ]
-      };
-      
-      rankingChartInstance.setOption(option);
-    } else {
-        const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      legend: {
-        data: ['销售量', '利润', '增长率'],
-        textStyle: {
-          color: '#666'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: products,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          rotate: 45
-        }
-      },
-      yAxis: [
-        {
-          type: 'value',
-          name: '销量/利润',
-          nameTextStyle: {
-            color: '#666'
-          },
-          axisLine: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666'
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#eee'
-            }
-          }
-        },
-        {
-          type: 'value',
-          name: '增长率 (%)',
-          nameTextStyle: {
-            color: '#666'
-          },
-          axisLine: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666',
-            formatter: '{value}%'
-          },
-          splitLine: {
-            show: false
-          }
-        }
-      ],
-        series: [
-          {
-            name: '销售量',
-            type: 'bar',
-            data: sales,
-            itemStyle: {
-              color: '#5470c6'
-            }
-          },
-          {
-            name: '利润',
-            type: 'bar',
-            data: profits,
-            itemStyle: {
-              color: '#91cc75'
-            }
-          },
-          {
-            name: '增长率',
-            type: 'line',
-            yAxisIndex: 1,
-            data: growth,
-            symbol: 'circle',
-            symbolSize: 8,
-            lineStyle: {
-              width: 2,
-              color: '#fac858'
-            },
-            itemStyle: {
-              color: '#fac858'
-            },
-            label: {
-              show: true,
-              position: 'top',
-              formatter: '{c}%',
-              color: '#666'
-            }
-          }
-        ]
-      };
-      
-      rankingChartInstance.setOption(option);
-    }
-  };
+    <!-- 下方区：排行榜 + 地区 + 任务状态 -->
+    <div class="bot-row">
+      <!-- 热销产品排行 -->
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">🏆 热销产品 TOP 10</span>
+        </div>
+        <div class="rank-list">
+          <div class="rank-item" v-for="(p, i) in topProducts" :key="i">
+            <span class="rank-no" :class="['rank-' + (i+1)]">{{ i + 1 }}</span>
+            <span class="rank-name">{{ p.name }}</span>
+            <div class="rank-bar-wrap">
+              <div class="rank-bar" :style="{ width: (p.sales / topProducts[0].sales * 100) + '%', background: rankColor(i) }"></div>
+            </div>
+            <span class="rank-val">{{ p.sales }}件</span>
+          </div>
+        </div>
+      </div>
 
-  // 监听窗口大小变化，重新调整图表大小
-  const handleResize = () => {
-    salesTrendChartInstance && salesTrendChartInstance.resize();
-    categoryPieChartInstance && categoryPieChartInstance.resize();
-    regionBarChartInstance && regionBarChartInstance.resize();
-    priceFluctuationChartInstance && priceFluctuationChartInstance.resize();
-    rankingChartInstance && rankingChartInstance.resize();
-  };
+      <!-- 地区分布 -->
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">📍 地区销售分布</span>
+        </div>
+        <div class="region-list">
+          <div class="region-item" v-for="r in regions" :key="r.name">
+            <div class="region-top">
+              <span class="region-name">{{ r.name }}</span>
+              <span class="region-amt">¥{{ r.amount }}万</span>
+            </div>
+            <div class="region-bar-bg">
+              <div class="region-bar-fill" :style="{ width: (r.amount / regions[0].amount * 100) + '%' }"></div>
+            </div>
+            <span class="region-pct">占比 {{ r.pct }}%</span>
+          </div>
+        </div>
+      </div>
 
-  // 监听选择的产品变化
-  watch(selectedProduct, () => {
-    updateSalesTrendChart();
-  });
+      <!-- 任务状态 + 用户构成 -->
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">📋 任务状态分布</span>
+        </div>
+        <div class="task-stats">
+          <div class="task-item" v-for="t in taskStatus" :key="t.label">
+            <div class="task-circle" :style="{ background: t.color }">
+              <span class="task-num">{{ t.count }}</span>
+            </div>
+            <span class="task-label">{{ t.label }}</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-header" style="margin-top:12px">
+          <span class="card-title">👤 用户构成</span>
+        </div>
+        <div class="user-composition">
+          <div class="uc-bar">
+            <div class="uc-seg" v-for="u in userComp" :key="u.label" :style="{ width: u.pct + '%', background: u.color }" :title="u.label + ': ' + u.pct + '%'"></div>
+          </div>
+          <div class="uc-legend">
+            <span v-for="u in userComp" :key="u.label" class="uc-item">
+              <em :style="{ background: u.color }"></em>{{ u.label }} {{ u.pct }}%
+            </span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-header" style="margin-top:12px">
+          <span class="card-title">⭐ 平均评分</span>
+        </div>
+        <div class="rating-row">
+          <div class="rating-big">4.8</div>
+          <div class="stars">★★★★★</div>
+          <div class="rating-sub">基于 8,234 条评价</div>
+        </div>
+      </div>
+    </div>
 
-  // 监听销售图表类型变化
-  watch(salesChartType, () => {
-    updateSalesTrendChart();
-  });
+    <!-- 底部：近7日订单走势 -->
+    <div class="bot2-row">
+      <div class="chart-card chart-full">
+        <div class="card-header">
+          <span class="card-title">近 7 日订单与收入走势</span>
+          <div class="legend-row">
+            <span class="legend-item"><em class="dot dot-green"></em>订单数</span>
+            <span class="legend-item"><em class="dot dot-blue"></em>收入(元)</span>
+          </div>
+        </div>
+        <div class="line-chart-wrap">
+          <svg class="line-svg" viewBox="0 0 700 120" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#42b983" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#42b983" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="grad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6c9eff" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#6c9eff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- 订单线 -->
+            <path :d="orderPath.area" fill="url(#grad1)"/>
+            <path :d="orderPath.line" fill="none" stroke="#42b983" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- 收入线 -->
+            <path :d="revPath.area" fill="url(#grad2)"/>
+            <path :d="revPath.line" fill="none" stroke="#6c9eff" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- 数据点 -->
+            <circle v-for="(pt, i) in orderPoints" :key="'o'+i" :cx="pt.x" :cy="pt.y" r="4" fill="#42b983" stroke="white" stroke-width="1.5"/>
+            <circle v-for="(pt, i) in revPoints" :key="'r'+i" :cx="pt.x" :cy="pt.y" r="4" fill="#6c9eff" stroke="white" stroke-width="1.5"/>
+          </svg>
+          <div class="line-x-labels">
+            <span v-for="d in week7" :key="d">{{ d }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
-  // 监听饼图类型变化
-  watch(pieChartType, () => {
-    updateCategoryPieChart();
-  });
+<script setup>
+import { computed } from 'vue'
 
-  // 监听地区图表类型变化
-  watch(regionChartType, () => {
-    updateRegionBarChart();
-  });
+// 月度数据
+const monthData = [
+  { month: '1月', sales: 18, orders: 420 },
+  { month: '2月', sales: 22, orders: 510 },
+  { month: '3月', sales: 28, orders: 640 },
+  { month: '4月', sales: 35, orders: 820 },
+  { month: '5月', sales: 42, orders: 980 },
+  { month: '6月', sales: 38, orders: 880 },
+  { month: '7月', sales: 55, orders: 1280 },
+  { month: '8月', sales: 48, orders: 1100 },
+  { month: '9月', sales: 52, orders: 1200 },
+  { month: '10月', sales: 46, orders: 1060 },
+  { month: '11月', sales: 58, orders: 1350 },
+  { month: '12月', sales: 62, orders: 1420 },
+]
 
-  // 监听价格图表类型变化
-  watch(priceChartType, () => {
-    updatePriceFluctuationChart();
-  });
+// 品类
+const categories = [
+  { name: '蔬菜水果', pct: 43, color: '#42b983' },
+  { name: '粮油谷物', pct: 28, color: '#73d9a8' },
+  { name: '禽蛋水产', pct: 20, color: '#f5a623' },
+  { name: '坚果干货', pct: 14, color: '#e85d5d' },
+  { name: '茶叶特产', pct: 5, color: '#6c9eff' },
+]
 
-  // 监听排行图表类型变化
-  watch(rankingChartType, () => {
-    updateRankingChart();
-  });
+// 热销产品
+const topProducts = [
+  { name: '新鲜草莓', sales: 3280 },
+  { name: '有机菠菜', sales: 2960 },
+  { name: '农家土鸡蛋', sales: 2740 },
+  { name: '黑木耳', sales: 2510 },
+  { name: '红富士苹果', sales: 2380 },
+  { name: '湖北莲藕', sales: 2100 },
+  { name: '东北大米', sales: 1960 },
+  { name: '云南蜂蜜', sales: 1820 },
+  { name: '板栗', sales: 1640 },
+  { name: '普洱茶叶', sales: 1480 },
+]
 
-  // 监听时间范围变化
-  watch(timeRange, () => {
-    // 这里可以根据时间范围更新所有图表数据
-    // 简化起见，这里不做实际数据更新
-  });
-
-  // 在组件挂载时初始化所有图表
-  onMounted(() => {
-    // 初始化所有图表
-    initSalesTrendChart();
-    initCategoryPieChart();
-    initRegionBarChart();
-    initPriceFluctuationChart();
-    initRankingChart();
-    
-    // 添加窗口大小变化监听
-    window.addEventListener('resize', handleResize);
-  });
-
-  // 组件卸载前清理资源
-  onBeforeUnmount(() => {
-    // 移除窗口大小变化监听
-    window.removeEventListener('resize', handleResize);
-    
-    // 销毁图表实例
-    salesTrendChartInstance && salesTrendChartInstance.dispose();
-    categoryPieChartInstance && categoryPieChartInstance.dispose();
-    regionBarChartInstance && regionBarChartInstance.dispose();
-    priceFluctuationChartInstance && priceFluctuationChartInstance.dispose();
-    rankingChartInstance && rankingChartInstance.dispose();
-  });
-
-</script>
-
-<style scoped lang=scss>
-.data-manage-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-  min-width: 1200px;
-  margin-left: -50px;
-  .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      color: #303133;
-    }
-    
-    .time-selector {
-      display: flex;
-      align-items: center;
-    }
-  }
-  
-  .dashboard-row {
-    margin-bottom: 20px;
-  }
-  
-  .data-card {
-    display: flex;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-    transition: all 0.3s;
-    
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.1);
-    }
-    
-    .card-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      margin-right: 15px;
-      font-size: 24px;
-      color: #fff;
-    }
-    
-    .card-content {
-      flex: 1;
-      
-      .card-title {
-        font-size: 14px;
-        color: #909399;
-        margin-bottom: 5px;
-      }
-      
-      .card-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #303133;
-        margin-bottom: 5px;
-      }
-      
-      .card-change {
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        
-        i {
-          margin-right: 5px;
-        }
-        
-        &.up {
-          color: #67c23a;
-        }
-        
-        &.down {
-          color: #f56c6c;
-        }
-      }
-    }
-    
-    &.sales {
-      .card-icon {
-        background-color: #409eff;
-      }
-    }
-    
-    &.orders {
-      .card-icon {
-        background-color: #67c23a;
-      }
-    }
-    
-    &.products {
-      .card-icon {
-        background-color: #e6a23c;
-      }
-    }
-    
-    &.farmers {
-      .card-icon {
-        background-color: #f56c6c;
-      }
-    }
-  }
-  
-  .chart-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    margin-bottom: 20px;
-    
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      
-      h3 {
-        margin: 0;
-        font-size: 18px;
-        color: #303133;
-        font-weight: 500;
-      }
-    }
-    
-    .chart {
-      height: 350px;
-      width: 100%;
-    }
-  }
+const rankColor = (i) => {
+  const colors = ['#f5a623', '#42b983', '#6c9eff', '#73d9a8', '#e85d5d']
+  return colors[i % colors.length]
 }
 
-// 响应式调整
-@media screen and (max-width: 768px) {
-  .data-manage-container {
-    padding: 10px;
-    min-width: auto;
-    
-    .dashboard-header {
-      flex-direction: column;
-      align-items: flex-start;
-      
-      h1 {
-        margin-bottom: 10px;
-      }
-    }
-    
-    .chart-container {
-      .chart-header {
-        flex-direction: column;
-        align-items: flex-start;
-        
-        h3 {
-          margin-bottom: 10px;
-        }
-      }
-      
-      .chart {
-        height: 300px;
-      }
-    }
-  }
+// 地区
+const regions = [
+  { name: '华东地区', amount: 89.2, pct: 31.3 },
+  { name: '华南地区', amount: 72.4, pct: 25.4 },
+  { name: '华北地区', amount: 54.8, pct: 19.3 },
+  { name: '华中地区', amount: 38.6, pct: 13.6 },
+  { name: '西南地区', amount: 18.2, pct: 6.4 },
+  { name: '其他地区', amount: 11.5, pct: 4.0 },
+]
+
+// 任务状态
+const taskStatus = [
+  { label: '进行中', count: 38, color: '#42b983' },
+  { label: '已完成', count: 142, color: '#6c9eff' },
+  { label: '待审核', count: 24, color: '#f5a623' },
+  { label: '已下架', count: 18, color: '#e85d5d' },
+]
+
+// 用户构成
+const userComp = [
+  { label: '客户', pct: 58, color: '#42b983' },
+  { label: '农户', pct: 32, color: '#6c9eff' },
+  { label: '管理员', pct: 10, color: '#f5a623' },
+]
+
+// 近7日
+const week7 = ['7/12', '7/13', '7/14', '7/15', '7/16', '7/17', '7/18']
+const orders7 = [320, 480, 390, 560, 620, 510, 740]
+const rev7 = [12400, 18600, 15200, 21800, 24100, 19800, 28700]
+
+const mkPath = (vals, maxVal, H = 100, W = 700) => {
+  const pts = vals.map((v, i) => ({
+    x: i * (W / (vals.length - 1)),
+    y: H - (v / maxVal) * H + 10
+  }))
+  const line = pts.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ')
+  const area = line + ` L${pts[pts.length-1].x},${H+10} L0,${H+10} Z`
+  return { line, area, pts }
+}
+
+const orderPath = computed(() => mkPath(orders7, Math.max(...orders7) * 1.1))
+const revPath = computed(() => mkPath(rev7, Math.max(...rev7) * 1.1))
+const orderPoints = computed(() => orderPath.value.pts)
+const revPoints = computed(() => revPath.value.pts)
+</script>
+
+<style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+* { box-sizing: border-box; }
+
+.dashboard {
+  margin-top: -20px;
+  margin-left: -5vw;
+  margin-right: -5vw;
+  padding: 24px 5vw 40px;
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+// ── Header ──
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+.header-badge {
+  display: inline-block;
+  background: #42b983;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+.header-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #1a2e1a;
+  letter-spacing: -0.5px;
+}
+.header-sub { font-size: 13px; color: #7a9a7a; margin: 0; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #7a9a7a;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #42b983;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+.live-text { font-weight: 600; color: #42b983; }
+
+// ── KPI Cards ──
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: white;
+  border-radius: 14px;
+  padding: 18px 20px 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  &:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+}
+.kpi-icon { font-size: 26px; margin-bottom: 8px; }
+.kpi-label { font-size: 12px; color: #7a9a7a; font-weight: 500; margin-bottom: 4px; }
+.kpi-value { font-size: 13px; color: #1a2e1a; font-weight: 600; }
+.kpi-num { font-size: 26px; font-weight: 700; font-family: 'DM Mono', monospace; }
+.kpi-unit { font-size: 13px; color: #7a9a7a; margin-left: 2px; }
+.kpi-trend { font-size: 11px; font-weight: 600; margin-top: 6px; }
+.kpi-trend.up { color: #42b983; }
+.kpi-trend.down { color: #e85d5d; }
+.kpi-spark {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 70px; height: 28px; opacity: 0.4;
+}
+.kpi-1 .kpi-spark { color: #42b983; }
+.kpi-2 .kpi-spark { color: #6c9eff; }
+.kpi-3 .kpi-spark { color: #f5a623; }
+.kpi-4 .kpi-spark { color: #42b983; }
+.kpi-5 .kpi-spark { color: #e85d5d; }
+
+// ── Chart Card Base ──
+.chart-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 14px; font-weight: 700; color: #1a2e1a; }
+.legend-row { display: flex; gap: 14px; }
+.legend-item { font-size: 12px; color: #7a9a7a; display: flex; align-items: center; gap: 5px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.dot-green { background: #42b983; }
+.dot-orange { background: #f5a623; }
+.dot-blue { background: #6c9eff; }
+
+// ── Mid Row ──
+.mid-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.chart-wide {}
+.chart-narrow {}
+
+// ── Bar Chart ──
+.bar-chart-wrap {
+  display: flex;
+  gap: 8px;
+  height: 160px;
+}
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #aac4aa;
+  padding-bottom: 20px;
+  text-align: right;
+  min-width: 28px;
+}
+.bars-area {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  position: relative;
+  padding-bottom: 20px;
+}
+.grid-lines {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 20px;
+  pointer-events: none;
+}
+.grid-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: #f0f4f0;
+  &:nth-child(1) { top: 0%; }
+  &:nth-child(2) { top: 25%; }
+  &:nth-child(3) { top: 50%; }
+  &:nth-child(4) { top: 75%; }
+}
+.bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.bar-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 140px;
+}
+.bar {
+  width: 10px;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.8; }
+  &:hover .bar-tip { display: block; }
+}
+.bar-green { background: linear-gradient(to top, #2d8a5e, #42b983); }
+.bar-orange { background: linear-gradient(to top, #d4860e, #f5a623); }
+.bar-tip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2e1a;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-bottom: 3px;
+  z-index: 10;
+}
+.bar-label {
+  font-size: 10px;
+  color: #aac4aa;
+  position: absolute;
+  bottom: 0;
+  white-space: nowrap;
+}
+
+// ── Donut ──
+.donut-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+.donut-svg { width: 150px; height: 150px; }
+.donut-seg { transition: stroke-width 0.2s; &:hover { stroke-width: 32; } }
+.donut-center-val { font-size: 22px; font-weight: 700; fill: #1a2e1a; font-family: 'DM Mono', monospace; }
+.donut-center-label { font-size: 9px; fill: #7a9a7a; }
+.donut-legend { display: flex; flex-direction: column; gap: 6px; }
+.dl-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.dl-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.dl-name { flex: 1; color: #4a6a4a; }
+.dl-pct { font-weight: 700; color: #1a2e1a; font-family: 'DM Mono', monospace; }
+
+// ── Bottom Row ──
+.bot-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+// ── Rank List ──
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-item { display: flex; align-items: center; gap: 8px; }
+.rank-no {
+  width: 20px; height: 20px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; background: #f0f4f0; color: #7a9a7a;
+  flex-shrink: 0;
+}
+.rank-1 { background: #f5a623; color: white; }
+.rank-2 { background: #aac4aa; color: white; }
+.rank-3 { background: #c49a6c; color: white; }
+.rank-name { font-size: 12px; color: #4a6a4a; width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-bar-wrap { flex: 1; height: 6px; background: #f0f4f0; border-radius: 3px; overflow: hidden; }
+.rank-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+.rank-val { font-size: 11px; color: #7a9a7a; font-family: 'DM Mono', monospace; width: 46px; text-align: right; flex-shrink: 0; }
+
+// ── Region ──
+.region-list { display: flex; flex-direction: column; gap: 12px; }
+.region-item {}
+.region-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.region-name { font-size: 12px; color: #4a6a4a; font-weight: 500; }
+.region-amt { font-size: 12px; font-weight: 700; color: #1a2e1a; font-family: 'DM Mono', monospace; }
+.region-bar-bg { height: 6px; background: #f0f4f0; border-radius: 3px; overflow: hidden; margin-bottom: 2px; }
+.region-bar-fill { height: 100%; background: linear-gradient(to right, #42b983, #73d9a8); border-radius: 3px; transition: width 0.6s ease; }
+.region-pct { font-size: 10px; color: #aac4aa; }
+
+// ── Task + User ──
+.task-stats { display: flex; gap: 10px; justify-content: space-between; }
+.task-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.task-circle {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.9;
+}
+.task-num { font-size: 16px; font-weight: 700; color: white; font-family: 'DM Mono', monospace; }
+.task-label { font-size: 11px; color: #7a9a7a; text-align: center; }
+.divider { height: 1px; background: #f0f4f0; margin: 12px 0 0; }
+
+.user-composition { padding-top: 4px; }
+.uc-bar { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin-bottom: 8px; }
+.uc-seg { height: 100%; transition: width 0.6s; }
+.uc-legend { display: flex; gap: 12px; }
+.uc-item {
+  font-size: 11px; color: #7a9a7a; display: flex; align-items: center; gap: 4px;
+  em { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+}
+
+.rating-row { display: flex; align-items: center; gap: 10px; padding-top: 4px; }
+.rating-big { font-size: 32px; font-weight: 700; color: #1a2e1a; font-family: 'DM Mono', monospace; line-height: 1; }
+.stars { color: #f5a623; font-size: 16px; letter-spacing: 1px; }
+.rating-sub { font-size: 11px; color: #aac4aa; }
+
+// ── Bottom 2 Row ──
+.bot2-row { }
+.chart-full { }
+.line-chart-wrap { position: relative; }
+.line-svg { width: 100%; height: 120px; display: block; }
+.line-x-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0 0;
+  font-size: 11px;
+  color: #aac4aa;
 }
 </style>
